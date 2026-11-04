@@ -1,0 +1,61 @@
+name: ci-cd
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # Compila, corre los tests (dominio, casos de uso, controllers, ArchUnit)
+      # y los de integración con Testcontainers (el runner de GitHub tiene Docker).
+      - name: Build y tests
+        run: ./mvnw -B verify
+
+      - name: Guardar el jar
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: target/app.jar
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app
+
+      - name: Deploy a Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: app.jar
+
+      # El smoke test va contra APIM: la llamada directa al App Service debe dar 403.
+      - name: Smoke test vía APIM
+        run: |
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Ocp-Apim-Subscription-Key: ${{ secrets.APIM_SUBSCRIPTION_KEY }}" \
+              "${{ secrets.APIM_BASE_URL }}/core/v1/health")
+            echo "intento $i → $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          exit 1

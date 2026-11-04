@@ -1,0 +1,22 @@
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Secretos: nunca al repo
+.env
+*.pfx
+*.pem
+*.key
+*.crt
+publish-profile*.xml
+
+# macOS
+.DS_Store

@@ -1,0 +1,62 @@
+# Solo referencias a variables de entorno. Los valores reales viven en App Service → Configuration.
+server:
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+
+spring:
+  application:
+    name: ms-core-java
+  datasource:
+    url: ${SQL_URL:jdbc:sqlserver://localhost:1433;databaseName=coredb;encrypt=true;trustServerCertificate=true}
+    username: ${SQL_USER:sa}
+    password: ${SQL_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${SQL_POOL_SIZE:10}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_absent
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  zone: ${APP_ZONE:America/Costa_Rica}
+  jwt:
+    secret: ${JWT_SECRET:}
+    ttl-hours: ${JWT_TTL_HOURS:8}
+    issuer: ${JWT_ISSUER:skillgrow-core}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    demo-enabled: ${GOOGLE_DEMO_ENABLED:false}
+    demo-user-id: ${GOOGLE_DEMO_USER_ID:usr_001}
+  events:
+    enabled: ${EVENTS_ENABLED:false}
+    connection: ${SERVICEBUS_CONNECTION:}
+    queue: ${SERVICEBUS_QUEUE:notifications}
+  apim:
+    cert-check: ${APIM_CERT_CHECK:true}
+    cert-thumbprint: ${APIM_CERT_THUMBPRINT:}
+  catalog:
+    mode: ${SERVICE_CATALOG_MODE:http}
+    base-url: ${DOMINIO_BASE_URL:}
+    subscription-key: ${APIM_SUBSCRIPTION_KEY:}
+    timeout-ms: ${SERVICE_CATALOG_TIMEOUT_MS:3000}

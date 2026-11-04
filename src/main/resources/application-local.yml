@@ -1,0 +1,18 @@
+# Perfil para correr en la máquina con docker-compose (SQL Server local), sin APIM ni Service Bus.
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=coredb;encrypt=true;trustServerCertificate=true
+    username: sa
+    password: ${SQL_PASSWORD:Local_Passw0rd!}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-que-no-se-usa-en-azure-0123456789}
+  google:
+    demo-enabled: true
+  events:
+    enabled: false
+  apim:
+    cert-check: false
+  catalog:
+    mode: stub
