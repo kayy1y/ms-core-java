@@ -14,7 +14,8 @@ public record AppProperties(
 
     public record Jwt(String secret, int ttlHours, String issuer) {}
 
-    public record Google(String clientId, boolean demoEnabled, String demoUserId) {}
+    /** demoEnabled solo en local: el idToken "demo" entra como demoEmail (igual que el mock de la Fase I). */
+    public record Google(String clientId, boolean demoEnabled, String demoEmail) {}
 
     public record Events(boolean enabled, String connection, String queue) {}
 

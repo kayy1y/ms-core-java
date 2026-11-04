@@ -7,7 +7,8 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:local-dev-secret-que-no-se-usa-en-azure-0123456789}
+    # Valor solo para desarrollo local (base64). En Azure se usa otro, guardado como secreto.
+    secret: ${JWT_SECRET:NRpRoSlMSVquYFDjVghl0cgzgdZ5IDIA2jFivCUAbeHR+65IfKYEAaFNz5NCn2wr}
   google:
     demo-enabled: true
   events:
