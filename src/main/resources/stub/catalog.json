@@ -1,0 +1,536 @@
+{
+  "services": [
+    {
+      "id": "srv_001",
+      "mentorId": "usr_002",
+      "title": "Python: funciones y datos",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_002",
+      "mentorId": "usr_005",
+      "title": "SQL: consultas y joins",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_003",
+      "mentorId": "usr_006",
+      "title": "Probabilidad: técnicas de conteo",
+      "durationMinutes": 90,
+      "type": "grupal",
+      "capacity": 5,
+      "modality": "ambas",
+      "status": "activo"
+    },
+    {
+      "id": "srv_004",
+      "mentorId": "usr_007",
+      "title": "Inferencias y reglas de deducción",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_005",
+      "mentorId": "usr_008",
+      "title": "Java: clases y objetos",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_006",
+      "mentorId": "usr_009",
+      "title": "Límites y derivadas",
+      "durationMinutes": 90,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_007",
+      "mentorId": "usr_002",
+      "title": "SQL para análisis de datos",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_008",
+      "mentorId": "usr_002",
+      "title": "Introducción a Data Analytics",
+      "durationMinutes": 90,
+      "type": "grupal",
+      "capacity": 4,
+      "modality": "ambas",
+      "status": "activo"
+    },
+    {
+      "id": "srv_009",
+      "mentorId": "usr_005",
+      "title": "APIs REST con Java",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_010",
+      "mentorId": "usr_006",
+      "title": "Matemática discreta: repaso de parcial",
+      "durationMinutes": 120,
+      "type": "grupal",
+      "capacity": 8,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_011",
+      "mentorId": "usr_007",
+      "title": "Conjuntos y relaciones",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_012",
+      "mentorId": "usr_008",
+      "title": "Estructuras de datos en Java",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_013",
+      "mentorId": "usr_009",
+      "title": "Integrales para principiantes",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "ambas",
+      "status": "activo"
+    },
+    {
+      "id": "srv_014",
+      "mentorId": "usr_010",
+      "title": "Arduino desde cero",
+      "durationMinutes": 120,
+      "type": "grupal",
+      "capacity": 4,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_015",
+      "mentorId": "usr_010",
+      "title": "Análisis de circuitos DC",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_016",
+      "mentorId": "usr_011",
+      "title": "Estadística descriptiva con R",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_017",
+      "mentorId": "usr_012",
+      "title": "React: componentes y estado",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_018",
+      "mentorId": "usr_012",
+      "title": "JavaScript moderno",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_019",
+      "mentorId": "usr_013",
+      "title": "Inglés conversacional",
+      "durationMinutes": 45,
+      "type": "grupal",
+      "capacity": 5,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_020",
+      "mentorId": "usr_013",
+      "title": "Preparación TOEFL",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_021",
+      "mentorId": "usr_014",
+      "title": "Física I: cinemática",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_022",
+      "mentorId": "usr_014",
+      "title": "Dinámica y leyes de Newton",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 4,
+      "modality": "ambas",
+      "status": "activo"
+    },
+    {
+      "id": "srv_023",
+      "mentorId": "usr_015",
+      "title": "Prototipos en Figma",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_024",
+      "mentorId": "usr_016",
+      "title": "Química general: estequiometría",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_025",
+      "mentorId": "usr_017",
+      "title": "Contabilidad básica",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_026",
+      "mentorId": "usr_017",
+      "title": "Excel para cursos",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_027",
+      "mentorId": "usr_018",
+      "title": "Algoritmos y complejidad",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_028",
+      "mentorId": "usr_018",
+      "title": "C++ para programación competitiva",
+      "durationMinutes": 120,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_029",
+      "mentorId": "usr_019",
+      "title": "Microeconomía: oferta y demanda",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_030",
+      "mentorId": "usr_020",
+      "title": "Terminal de Linux sin miedo",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 5,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_031",
+      "mentorId": "usr_021",
+      "title": "Pandas para análisis de datos",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_032",
+      "mentorId": "usr_022",
+      "title": "Modelado de bases de datos",
+      "durationMinutes": 90,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "ambas",
+      "status": "activo"
+    },
+    {
+      "id": "srv_033",
+      "mentorId": "usr_023",
+      "title": "Git en equipo",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_034",
+      "mentorId": "usr_024",
+      "title": "Álgebra lineal: matrices",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "presencial",
+      "status": "activo"
+    },
+    {
+      "id": "srv_035",
+      "mentorId": "usr_001",
+      "title": "Java para principiantes",
+      "durationMinutes": 60,
+      "type": "individual",
+      "capacity": 1,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_036",
+      "mentorId": "usr_001",
+      "title": "SQL desde cero",
+      "durationMinutes": 60,
+      "type": "grupal",
+      "capacity": 4,
+      "modality": "virtual",
+      "status": "activo"
+    },
+    {
+      "id": "srv_037",
+      "mentorId": "usr_024",
+      "title": "Precálculo intensivo",
+      "durationMinutes": 90,
+      "type": "grupal",
+      "capacity": 6,
+      "modality": "virtual",
+      "status": "inactivo"
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk_python",
+      "name": "Python"
+    },
+    {
+      "id": "sk_java",
+      "name": "Java"
+    },
+    {
+      "id": "sk_js",
+      "name": "JavaScript"
+    },
+    {
+      "id": "sk_react",
+      "name": "React"
+    },
+    {
+      "id": "sk_cpp",
+      "name": "C++"
+    },
+    {
+      "id": "sk_poo",
+      "name": "Programación orientada a objetos"
+    },
+    {
+      "id": "sk_algo",
+      "name": "Algoritmos"
+    },
+    {
+      "id": "sk_apis",
+      "name": "APIs REST"
+    },
+    {
+      "id": "sk_git",
+      "name": "Git"
+    },
+    {
+      "id": "sk_docker",
+      "name": "Docker"
+    },
+    {
+      "id": "sk_linux",
+      "name": "Linux"
+    },
+    {
+      "id": "sk_redes",
+      "name": "Redes"
+    },
+    {
+      "id": "sk_sql",
+      "name": "SQL"
+    },
+    {
+      "id": "sk_postgres",
+      "name": "PostgreSQL"
+    },
+    {
+      "id": "sk_modelado",
+      "name": "Modelado de datos"
+    },
+    {
+      "id": "sk_analytics",
+      "name": "Data Analytics"
+    },
+    {
+      "id": "sk_pandas",
+      "name": "Pandas"
+    },
+    {
+      "id": "sk_estad",
+      "name": "Estadística descriptiva"
+    },
+    {
+      "id": "sk_r",
+      "name": "R"
+    },
+    {
+      "id": "sk_prob",
+      "name": "Probabilidad"
+    },
+    {
+      "id": "sk_conteo",
+      "name": "Técnicas de conteo"
+    },
+    {
+      "id": "sk_logica",
+      "name": "Lógica proposicional"
+    },
+    {
+      "id": "sk_discreta",
+      "name": "Matemática discreta"
+    },
+    {
+      "id": "sk_limites",
+      "name": "Límites"
+    },
+    {
+      "id": "sk_derivadas",
+      "name": "Derivadas"
+    },
+    {
+      "id": "sk_integrales",
+      "name": "Integrales"
+    },
+    {
+      "id": "sk_algebra",
+      "name": "Álgebra lineal"
+    },
+    {
+      "id": "sk_precalc",
+      "name": "Precálculo"
+    },
+    {
+      "id": "sk_fisica1",
+      "name": "Física I"
+    },
+    {
+      "id": "sk_mecanica",
+      "name": "Mecánica"
+    },
+    {
+      "id": "sk_quimica",
+      "name": "Química general"
+    },
+    {
+      "id": "sk_ingles",
+      "name": "Inglés conversacional"
+    },
+    {
+      "id": "sk_toefl",
+      "name": "Preparación TOEFL"
+    },
+    {
+      "id": "sk_figma",
+      "name": "Figma"
+    },
+    {
+      "id": "sk_ux",
+      "name": "Diseño UX"
+    },
+    {
+      "id": "sk_conta",
+      "name": "Contabilidad"
+    },
+    {
+      "id": "sk_excel",
+      "name": "Excel"
+    },
+    {
+      "id": "sk_circuitos",
+      "name": "Circuitos"
+    },
+    {
+      "id": "sk_arduino",
+      "name": "Arduino"
+    },
+    {
+      "id": "sk_micro",
+      "name": "Microeconomía"
+    }
+  ]
+}
