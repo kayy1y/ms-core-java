@@ -85,6 +85,7 @@ public class SessionService implements SessionCommandUseCase {
         ServiceSnapshot service = catalog.findService(c.serviceId())
                 .filter(ServiceSnapshot::active)
                 .orElseThrow(() -> new NotFoundException("El servicio"));
+        Session.checkCanRequest(service, userId, modality);
         long now = clock.millis();
         LocalDate today = LocalDate.now(clock);
         List<AvailabilityRule> rules = availability.findRules(service.mentorId());

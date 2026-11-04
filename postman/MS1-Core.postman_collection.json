@@ -1,0 +1,2658 @@
+{
+  "info": {
+    "_postman_id": "e921247e-20e2-51b9-a11c-06b9bccf074d",
+    "name": "SkillGrow · MS1 Core",
+    "description": "Pruebas de MS1 (Java). baseUrl local: http://localhost:8090 · Azure: https://<apim>.azure-api.net/core",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00-Auth",
+      "item": [
+        {
+          "name": "Login aprendiz (Valeria)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"token y usuario\", () => { pm.expect(b.token).to.be.a(\"string\"); pm.expect(b.user.createdAtEpochMs).to.be.a(\"number\"); });",
+                  "pm.collectionVariables.set(\"learnerToken\", b.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aprendiz@skillgrow.test\",\n  \"password\": \"Skill123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login mentora (Andrea)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"token y usuario\", () => { pm.expect(b.token).to.be.a(\"string\"); pm.expect(b.user.createdAtEpochMs).to.be.a(\"number\"); });",
+                  "pm.collectionVariables.set(\"mentorToken\", b.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentor@skillgrow.test\",\n  \"password\": \"Skill123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"token y usuario\", () => { pm.expect(b.token).to.be.a(\"string\"); pm.expect(b.user.createdAtEpochMs).to.be.a(\"number\"); });",
+                  "pm.collectionVariables.set(\"adminToken\", b.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@skillgrow.test\",\n  \"password\": \"Skill123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login con contraseña incorrecta → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"code INVALID_CREDENTIALS\", () => pm.expect(pm.response.json().code).to.eql(\"INVALID_CREDENTIALS\"));",
+                  "pm.test(\"formato de error estándar\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"status\",\"code\",\"message\",\"details\",\"timestampEpochMs\",\"path\"); pm.expect(b.timestampEpochMs).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aprendiz@skillgrow.test\",\n  \"password\": \"otra\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registro inválido → 400 con details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));",
+                  "pm.test(\"3 campos\", () => pm.expect(pm.response.json().details.map(d => d.field)).to.eql([\"fullName\",\"email\",\"password\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"A\",\n  \"email\": \"no-es-correo\",\n  \"password\": \"123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registro nuevo → 201",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"newEmail\", `qa+${Date.now()}@skillgrow.test`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"rol user\", () => pm.expect(pm.response.json().user.role).to.eql(\"user\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Persona de Prueba\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"Prueba123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registro con correo existente → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"code EMAIL_ALREADY_EXISTS\", () => pm.expect(pm.response.json().code).to.eql(\"EMAIL_ALREADY_EXISTS\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Valeria Rojas\",\n  \"email\": \"aprendiz@skillgrow.test\",\n  \"password\": \"Skill123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout → 204",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{learnerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01-Seguridad",
+      "item": [
+        {
+          "name": "Health es público",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"UP\", () => pm.expect(pm.response.json().status).to.eql(\"UP\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sin token → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"code UNAUTHORIZED\", () => pm.expect(pm.response.json().code).to.eql(\"UNAUTHORIZED\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Token inválido → 401",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"invalidToken\", \"abc.def.ghi\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{invalidToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Usuario sin rol admin en /admin → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"code FORBIDDEN\", () => pm.expect(pm.response.json().code).to.eql(\"FORBIDDEN\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{learnerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "admin",
+                "users"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02-MS1-Core",
+      "item": [
+        {
+          "name": "Perfil",
+          "item": [
+            {
+              "name": "GET /me",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test(\"perfil completo\", () => { pm.expect(b.email).to.eql(\"aprendiz@skillgrow.test\"); pm.expect(b.stats).to.have.property(\"completedAsLearner\"); pm.expect(b.createdAtEpochMs).to.be.a(\"number\"); });",
+                      "pm.collectionVariables.set(\"myFullName\", b.fullName);",
+                      "pm.collectionVariables.set(\"myBio\", b.bio);",
+                      "pm.collectionVariables.set(\"myKnowledge\", JSON.stringify(b.knowledge));",
+                      "pm.collectionVariables.set(\"myTeach\", JSON.stringify(b.teachSkills.map(t => ({skillId: t.skillId, level: t.level}))));",
+                      "pm.collectionVariables.set(\"myInterests\", JSON.stringify(b.learningInterests.map(i => ({skillId: i.skillId}))));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "PUT /me (mismos datos)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set(\"myBioJson\", JSON.stringify(pm.collectionVariables.get(\"myBio\") || \"\"));"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"{{myFullName}}\",\n  \"bio\": {{myBioJson}}\n}"
+                }
+              }
+            },
+            {
+              "name": "PUT /me con nombre corto → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"campo fullName\", () => pm.expect(pm.response.json().details[0].field).to.eql(\"fullName\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"A\"\n}"
+                }
+              }
+            },
+            {
+              "name": "PUT /me/knowledge",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/knowledge",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "knowledge"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"knowledge\": {{myKnowledge}} }"
+                }
+              }
+            },
+            {
+              "name": "PUT /me/teach-skills",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/teach-skills",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "teach-skills"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"teachSkills\": {{myTeach}} }"
+                }
+              }
+            },
+            {
+              "name": "PUT /me/teach-skills con habilidad inexistente → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/teach-skills",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "teach-skills"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"teachSkills\": [\n    {\n      \"skillId\": \"skl_no_existe\",\n      \"level\": \"basico\"\n    }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "PUT /me/interests",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/interests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "interests"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"learningInterests\": {{myInterests}} }"
+                }
+              }
+            },
+            {
+              "name": "PUT /me/email-preferences",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"guardada\", () => pm.expect(pm.response.json().emailPreferences.SESSION_REMINDER).to.eql(true));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/email-preferences",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "email-preferences"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"SESSION_REMINDER\": true\n}"
+                }
+              }
+            },
+            {
+              "name": "Perfil público sin correo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"sin email\", () => pm.expect(pm.response.json()).to.not.have.property(\"email\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/usr_002",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "users",
+                    "usr_002"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Perfil inexistente → 404",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 404\", () => pm.response.to.have.status(404));",
+                      "pm.test(\"code NOT_FOUND\", () => pm.expect(pm.response.json().code).to.eql(\"NOT_FOUND\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/usr_no_existe",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "users",
+                    "usr_no_existe"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Disponibilidad",
+          "item": [
+            {
+              "name": "GET /me/availability (mentora)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test(\"reglas y bloqueos\", () => { pm.expect(b.rules).to.be.an(\"array\"); pm.expect(b.blockedDates).to.be.an(\"array\"); });",
+                      "if (b.rules.length) pm.collectionVariables.set(\"mentorDay\", b.rules[0].dayOfWeek);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Día repetido → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"mensaje\", () => pm.expect(pm.response.json().message).to.include(\"Ya marcaste\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"dayOfWeek\": {{mentorDay}}, \"serviceIds\": [] }"
+                }
+              }
+            },
+            {
+              "name": "Día fuera de rango → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dayOfWeek\": 9,\n  \"serviceIds\": []\n}"
+                }
+              }
+            },
+            {
+              "name": "Bloquear fecha → 201",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const d = new Date(Date.now() + 200 * 86400000); pm.collectionVariables.set(\"blockDate\", d.toISOString().slice(0, 10));"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set(\"blockedId\", pm.response.json().id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/blocked-dates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "blocked-dates"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"date\": \"{{blockDate}}\", \"reason\": \"Prueba de Postman\" }"
+                }
+              }
+            },
+            {
+              "name": "Bloquear fecha pasada → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/blocked-dates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "blocked-dates"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2020-01-01\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Desbloquear → 204",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/blocked-dates/{{blockedId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "blocked-dates",
+                    "{{blockedId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Días disponibles del servicio",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "const days = pm.response.json();",
+                      "pm.test(\"al menos 2 días\", () => pm.expect(days.length).to.be.at.least(2));",
+                      "pm.test(\"formato YYYY-MM-DD\", () => pm.expect(days[0].date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/));",
+                      "pm.collectionVariables.set(\"dayA\", days[0].date); pm.collectionVariables.set(\"dayB\", days[1].date);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/services/{{serviceId}}/available-days",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "services",
+                    "{{serviceId}}",
+                    "available-days"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sesiones",
+          "item": [
+            {
+              "name": "Reservar → 201 pendiente",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test(\"pendiente y sin enlace\", () => { pm.expect(b.status).to.eql(\"pendiente\"); pm.expect(b.meetingLink).to.eql(null); });",
+                      "pm.test(\"historial en epoch\", () => pm.expect(b.history[0].atEpochMs).to.be.a(\"number\"));",
+                      "pm.collectionVariables.set(\"sessionId\", b.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceId\": \"{{serviceId}}\",\n  \"date\": \"{{dayA}}\",\n  \"modality\": \"virtual\",\n  \"learnerNote\": \"Prueba de Postman\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Reservar el mismo día → 400 DAY_UNAVAILABLE",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code DAY_UNAVAILABLE\", () => pm.expect(pm.response.json().code).to.eql(\"DAY_UNAVAILABLE\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceId\": \"{{serviceId}}\",\n  \"date\": \"{{dayA}}\",\n  \"modality\": \"virtual\",\n  \"learnerNote\": \"Prueba de Postman\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Reservar sin datos → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Reservar servicio propio → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));",
+                      "pm.test(\"mensaje\", () => pm.expect(pm.response.json().message).to.eql(\"No puedes solicitar tu propio servicio.\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceId\": \"{{serviceId}}\",\n  \"date\": \"{{dayA}}\",\n  \"modality\": \"virtual\",\n  \"learnerNote\": \"Prueba de Postman\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Detalle",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Sesión inexistente → 404",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 404\", () => pm.response.to.have.status(404));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/ses_no_existe",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "ses_no_existe"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "No participante → 403",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mis sesiones (próximas)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"lista paginada\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"totalRecords\",\"page\",\"pageSize\",\"items\"); pm.expect(b.items).to.be.an(\"array\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions?scope=upcoming&pageSize=5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "upcoming"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "5"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Solicitudes de la mentora",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"lista paginada\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"totalRecords\",\"page\",\"pageSize\",\"items\"); pm.expect(b.items).to.be.an(\"array\"); });",
+                      "pm.test(\"incluye la reserva\", () => pm.expect(pm.response.json().items.map(s => s.id)).to.include(pm.collectionVariables.get(\"sessionId\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "requests"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Aceptar sin enlace → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"zoom\"\n}"
+                }
+              }
+            },
+            {
+              "name": "El aprendiz no puede aceptar → 403",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"zoom\",\n  \"meetingLink\": \"https://zoom.us/j/1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Aceptar → confirmada",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"confirmada\", () => pm.expect(pm.response.json().status).to.eql(\"confirmada\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"google_meet\",\n  \"meetingLink\": \"https://meet.google.com/abc-defg-hij\"\n}"
+                }
+              }
+            },
+            {
+              "name": "El aprendiz ve el enlace",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"enlace visible\", () => pm.expect(pm.response.json().meetingLink).to.include(\"meet.google.com\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Completar antes del día → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code INVALID_STATUS_TRANSITION\", () => pm.expect(pm.response.json().code).to.eql(\"INVALID_STATUS_TRANSITION\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/complete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "complete"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reprogramar (aprendiz)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"reprogramada\", () => pm.expect(pm.response.json().status).to.eql(\"reprogramada\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/reschedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "reschedule"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"date\": \"{{dayB}}\", \"comment\": \"¿Podemos otro día?\" }"
+                }
+              }
+            },
+            {
+              "name": "Quien propuso no confirma → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code INVALID_STATUS_TRANSITION\", () => pm.expect(pm.response.json().code).to.eql(\"INVALID_STATUS_TRANSITION\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "La mentora confirma el nuevo día",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"nuevo día\", () => pm.expect(pm.response.json().date).to.eql(pm.collectionVariables.get(\"dayB\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                }
+              }
+            },
+            {
+              "name": "Cambiar enlace",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/meeting",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "meeting"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"zoom\",\n  \"meetingLink\": \"https://zoom.us/j/123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Cancelar (libera el día)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"cancelada por el aprendiz\", () => pm.expect(pm.response.json().cancelReason).to.eql(\"CANCELLED_BY_LEARNER\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "cancel"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"comment\": \"Fin de la prueba\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Rechazar una cancelada → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code INVALID_STATUS_TRANSITION\", () => pm.expect(pm.response.json().code).to.eql(\"INVALID_STATUS_TRANSITION\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{sessionId}}/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{sessionId}}",
+                    "reject"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Administración",
+          "item": [
+            {
+              "name": "Usuarios",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"lista paginada\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"totalRecords\",\"page\",\"pageSize\",\"items\"); pm.expect(b.items).to.be.an(\"array\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/users?search=valeria",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "valeria"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cambiar estado sin motivo → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/users/usr_001/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "users",
+                    "usr_001",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"x\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Suspender a un admin → 403",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/users/usr_003/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "users",
+                    "usr_003",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Prueba de permisos\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Sesiones",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"lista paginada\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"totalRecords\",\"page\",\"pageSize\",\"items\"); pm.expect(b.items).to.be.an(\"array\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/sessions?status=completada",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "sessions"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "completada"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Estadísticas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"30 días de actividad\", () => pm.expect(pm.response.json().activityLast30Days).to.have.length(30));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gamificación",
+          "item": [
+            {
+              "name": "Insignias activas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "badges"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Insignias de la mentora",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/usr_002/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "users",
+                    "usr_002",
+                    "badges"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mis logros",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"5 criterios\", () => pm.expect(pm.response.json()).to.have.length(5));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/achievements",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "achievements"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin: todas las insignias",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"lista paginada\", () => { const b = pm.response.json(); pm.expect(b).to.have.keys(\"totalRecords\",\"page\",\"pageSize\",\"items\"); pm.expect(b.items).to.be.an(\"array\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin: insignia inválida → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"X\",\n  \"description\": \"corta\",\n  \"criterion\": \"nada\",\n  \"threshold\": 0\n}"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "serviceId",
+      "value": "srv_001"
+    }
+  ]
+}

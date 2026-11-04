@@ -1,0 +1,1720 @@
+openapi: 3.0.1
+info:
+  title: SkillGrow · MS1 Core
+  description: "Usuarios, login, disponibilidad y sesiones de mentoría. Fechas en\
+    \ epoch ms; días de calendario en YYYY-MM-DD. Errores: { status, code, message,\
+    \ details, timestampEpochMs, path }."
+  version: 1.0.0
+security:
+- bearer: []
+tags:
+- name: Usuarios
+  description: Perfil público de otros usuarios
+- name: Administración
+  description: "Usuarios, sesiones y estadísticas (rol admin)"
+- name: Auth
+  description: Registro y login; devuelven el JWT que valida APIM
+- name: Perfil
+  description: Perfil del usuario autenticado
+- name: Disponibilidad
+  description: "Días de atención, fechas bloqueadas y días reservables"
+- name: Sesiones
+  description: "Reservar, aceptar, rechazar, reprogramar, cancelar y completar"
+- name: Gamificación
+  description: Insignias y logros
+paths:
+  /v1/sessions/{id}/meeting:
+    put:
+      tags:
+      - Sesiones
+      summary: Cambiar el enlace de una sesión virtual
+      operationId: meeting
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeetingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/sessions/{id}/location:
+    put:
+      tags:
+      - Sesiones
+      summary: Cambiar el lugar de una sesión presencial
+      operationId: location
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationDto"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/me:
+    get:
+      tags:
+      - Perfil
+      summary: Mi perfil
+      operationId: me
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    put:
+      tags:
+      - Perfil
+      summary: "Editar nombre, bio, foto, datos académicos y profesionales"
+      operationId: update
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JsonNode"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /v1/me/teach-skills:
+    put:
+      tags:
+      - Perfil
+      summary: Reemplazar las habilidades que enseño
+      operationId: teachSkills
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeachSkillsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /v1/me/knowledge:
+    put:
+      tags:
+      - Perfil
+      summary: Reemplazar los conocimientos libres
+      operationId: knowledge
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /v1/me/interests:
+    put:
+      tags:
+      - Perfil
+      summary: Reemplazar los intereses de aprendizaje
+      operationId: interests
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InterestsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /v1/me/email-preferences:
+    put:
+      tags:
+      - Perfil
+      summary: Activar o desactivar correos por tipo de notificación
+      operationId: emailPreferences
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: boolean
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /v1/me/availability/rules/{id}:
+    put:
+      tags:
+      - Disponibilidad
+      summary: Cambiar los servicios de un día
+      operationId: updateRule
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RuleRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RuleDto"
+    delete:
+      tags:
+      - Disponibilidad
+      summary: Quitar un día
+      operationId: deleteRule
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+  /v1/admin/badges/{id}:
+    put:
+      tags:
+      - Gamificación
+      summary: Editar insignia (admin)
+      operationId: update_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BadgeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadgeDto"
+  /v1/sessions:
+    get:
+      tags:
+      - Sesiones
+      summary: "Mis sesiones (role=learner|mentor|all, scope=upcoming|past|cancelled)"
+      operationId: list
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: role
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: scope
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseSessionResponse"
+    post:
+      tags:
+      - Sesiones
+      summary: Reservar un día (publica SESSION_REQUESTED al mentor)
+      operationId: create
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/me/availability/rules:
+    post:
+      tags:
+      - Disponibilidad
+      summary: Marcar un día de la semana como disponible
+      operationId: addRule
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RuleRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RuleDto"
+  /v1/me/availability/blocked-dates:
+    post:
+      tags:
+      - Disponibilidad
+      summary: Bloquear una fecha
+      operationId: addBlocked
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockedDateRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BlockedDateDto"
+  /v1/auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Crear cuenta con correo y contraseña
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /v1/auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Cerrar sesión
+      operationId: logout
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      responses:
+        "204":
+          description: No Content
+  /v1/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Login con correo y contraseña
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /v1/auth/google:
+    post:
+      tags:
+      - Auth
+      summary: Login con el idToken de Google
+      operationId: google
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleLoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /v1/admin/badges:
+    get:
+      tags:
+      - Gamificación
+      summary: "Todas las insignias, incluidas las inactivas (admin)"
+      operationId: all
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseBadgeDto"
+    post:
+      tags:
+      - Gamificación
+      summary: Crear insignia (admin)
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BadgeRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadgeDto"
+  /v1/sessions/{id}/reschedule:
+    patch:
+      tags:
+      - Sesiones
+      summary: Proponer otro día
+      operationId: reschedule
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/sessions/{id}/reject:
+    patch:
+      tags:
+      - Sesiones
+      summary: Rechazar una solicitud pendiente (mentor)
+      operationId: reject
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/sessions/{id}/complete:
+    patch:
+      tags:
+      - Sesiones
+      summary: "Marcar como completada (mentor, desde el día de la sesión)"
+      operationId: complete
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/sessions/{id}/cancel:
+    patch:
+      tags:
+      - Sesiones
+      summary: Cancelar
+      operationId: cancel
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/sessions/{id}/accept:
+    patch:
+      tags:
+      - Sesiones
+      summary: Aceptar (mentor) o confirmar el nuevo día (la otra parte)
+      operationId: accept
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/admin/users/{id}/status:
+    patch:
+      tags:
+      - Administración
+      summary: Suspender o reactivar (suspender cancela sus sesiones activas)
+      operationId: changeStatus
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusChangeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserStatusDto"
+  /v1/admin/badges/{id}/status:
+    patch:
+      tags:
+      - Gamificación
+      summary: Activar o desactivar insignia (admin)
+      operationId: status
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BadgeActiveRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadgeDto"
+  /v1/users/{id}:
+    get:
+      tags:
+      - Usuarios
+      summary: Perfil público (sin correo)
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PublicUserResponse"
+  /v1/users/{id}/badges:
+    get:
+      tags:
+      - Gamificación
+      summary: Insignias de un usuario
+      operationId: userBadges
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserBadgeDto"
+  /v1/sessions/{id}:
+    get:
+      tags:
+      - Sesiones
+      summary: Detalle de una sesión (solo participantes)
+      operationId: get_1
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /v1/services/{id}/available-days:
+    get:
+      tags:
+      - Disponibilidad
+      summary: "Días reservables de un servicio (desde mañana, con cupos)"
+      operationId: availableDays
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: excludeSessionId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableDayDto"
+  /v1/me/requests:
+    get:
+      tags:
+      - Sesiones
+      summary: Solicitudes que esperan mi respuesta (kind=received) o que envié (kind=sent)
+      operationId: requests
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseSessionResponse"
+  /v1/me/availability:
+    get:
+      tags:
+      - Disponibilidad
+      summary: Mis días de atención y fechas bloqueadas
+      operationId: get_2
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AvailabilityResponse"
+  /v1/me/achievements:
+    get:
+      tags:
+      - Gamificación
+      summary: Mi progreso hacia la próxima insignia de cada criterio
+      operationId: achievements
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AchievementDto"
+  /health:
+    get:
+      tags:
+      - health-controller
+      operationId: health
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /v1/health:
+    get:
+      tags:
+      - health-controller
+      operationId: health_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /v1/badges:
+    get:
+      tags:
+      - Gamificación
+      summary: Catálogo de insignias activas
+      operationId: badges
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BadgeDto"
+  /v1/admin/users:
+    get:
+      tags:
+      - Administración
+      summary: Usuarios con búsqueda y filtros
+      operationId: users
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: role
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseAdminUserRowDto"
+  /v1/admin/stats:
+    get:
+      tags:
+      - Administración
+      summary: "Usuarios, sesiones por estado y actividad de 30 días"
+      operationId: stats
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminStatsResponse"
+  /v1/admin/sessions:
+    get:
+      tags:
+      - Administración
+      summary: Todas las sesiones (sin enlaces ni lugares)
+      operationId: sessions
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: modality
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseSessionResponse"
+  /v1/me/availability/blocked-dates/{id}:
+    delete:
+      tags:
+      - Disponibilidad
+      summary: Desbloquear una fecha
+      operationId: deleteBlocked
+      parameters:
+      - name: user
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/CurrentUser"
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+components:
+  schemas:
+    CurrentUser:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum:
+          - USER
+          - ADMIN
+        name:
+          type: string
+        admin:
+          type: boolean
+    MeetingRequest:
+      type: object
+      properties:
+        platform:
+          type: string
+        otherPlatformName:
+          type: string
+        meetingLink:
+          type: string
+    HistoryDto:
+      type: object
+      properties:
+        status:
+          type: string
+        atEpochMs:
+          type: integer
+          format: int64
+        by:
+          type: string
+        comment:
+          type: string
+    LocationDto:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+    ServiceRef:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+        type:
+          type: string
+    SessionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        service:
+          $ref: "#/components/schemas/ServiceRef"
+        mentor:
+          $ref: "#/components/schemas/UserSummaryDto"
+        learners:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserSummaryDto"
+        date:
+          type: string
+        modality:
+          type: string
+        status:
+          type: string
+        platform:
+          type: string
+        otherPlatformName:
+          type: string
+        meetingLink:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationDto"
+        learnerNote:
+          type: string
+        proposedBy:
+          type: string
+        cancelReason:
+          type: string
+        cancelComment:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistoryDto"
+        canReview:
+          type: boolean
+        createdAtEpochMs:
+          type: integer
+          format: int64
+    UserSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        avatarUrl:
+          type: string
+        ratingAverage:
+          type: number
+          format: double
+        ratingCount:
+          type: integer
+          format: int64
+    JsonNode:
+      type: object
+    AcademicDto:
+      type: object
+      properties:
+        institution:
+          type: string
+        career:
+          type: string
+        level:
+          type: string
+    BadgeDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        criterion:
+          type: string
+        threshold:
+          type: number
+          format: double
+        minReviews:
+          type: integer
+          format: int32
+        active:
+          type: boolean
+    InterestDto:
+      type: object
+      properties:
+        skillId:
+          type: string
+        name:
+          type: string
+    ProfessionalDto:
+      type: object
+      properties:
+        occupation:
+          type: string
+        experience:
+          type: string
+    StatsDto:
+      type: object
+      properties:
+        ratingAverage:
+          type: number
+          format: double
+        ratingCount:
+          type: integer
+          format: int64
+        completedAsMentor:
+          type: integer
+          format: int64
+        completedAsLearner:
+          type: integer
+          format: int64
+        studentsHelped:
+          type: integer
+          format: int64
+    TeachSkillDto:
+      type: object
+      properties:
+        skillId:
+          type: string
+        name:
+          type: string
+        level:
+          type: string
+    UserBadgeDto:
+      type: object
+      properties:
+        badge:
+          $ref: "#/components/schemas/BadgeDto"
+        earnedAtEpochMs:
+          type: integer
+          format: int64
+        reason:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        avatarUrl:
+          type: string
+        bio:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        academic:
+          $ref: "#/components/schemas/AcademicDto"
+        professional:
+          $ref: "#/components/schemas/ProfessionalDto"
+        knowledge:
+          type: array
+          items:
+            type: string
+        teachSkills:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeachSkillDto"
+        learningInterests:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterestDto"
+        stats:
+          $ref: "#/components/schemas/StatsDto"
+        badges:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserBadgeDto"
+        emailPreferences:
+          type: object
+          additionalProperties:
+            type: boolean
+        createdAtEpochMs:
+          type: integer
+          format: int64
+    TeachSkillItem:
+      type: object
+      properties:
+        skillId:
+          type: string
+        level:
+          type: string
+    TeachSkillsRequest:
+      type: object
+      properties:
+        teachSkills:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeachSkillItem"
+    KnowledgeRequest:
+      type: object
+      properties:
+        knowledge:
+          type: array
+          items:
+            type: string
+    InterestItem:
+      type: object
+      properties:
+        skillId:
+          type: string
+    InterestsRequest:
+      type: object
+      properties:
+        learningInterests:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterestItem"
+    RuleRequest:
+      type: object
+      properties:
+        dayOfWeek:
+          type: integer
+          format: int32
+        serviceIds:
+          type: array
+          items:
+            type: string
+    RuleDto:
+      type: object
+      properties:
+        id:
+          type: string
+        dayOfWeek:
+          type: integer
+          format: int32
+        serviceIds:
+          type: array
+          items:
+            type: string
+    BadgeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        criterion:
+          type: string
+        threshold:
+          type: number
+          format: double
+        minReviews:
+          type: integer
+          format: int32
+        active:
+          type: boolean
+    CreateSessionRequest:
+      type: object
+      properties:
+        serviceId:
+          type: string
+        date:
+          type: string
+        modality:
+          type: string
+        learnerNote:
+          type: string
+    BlockedDateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+        reason:
+          type: string
+    BlockedDateDto:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+        reason:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    GoogleLoginRequest:
+      type: object
+      properties:
+        idToken:
+          type: string
+    RescheduleRequest:
+      type: object
+      properties:
+        date:
+          type: string
+        comment:
+          type: string
+    CommentRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+    AcceptRequest:
+      type: object
+      properties:
+        platform:
+          type: string
+        otherPlatformName:
+          type: string
+        meetingLink:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationDto"
+    StatusChangeRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        reason:
+          type: string
+    UserStatusDto:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+    BadgeActiveRequest:
+      type: object
+      properties:
+        active:
+          type: boolean
+    PublicUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        avatarUrl:
+          type: string
+        bio:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        academic:
+          $ref: "#/components/schemas/AcademicDto"
+        professional:
+          $ref: "#/components/schemas/ProfessionalDto"
+        knowledge:
+          type: array
+          items:
+            type: string
+        teachSkills:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeachSkillDto"
+        learningInterests:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterestDto"
+        stats:
+          $ref: "#/components/schemas/StatsDto"
+        badges:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserBadgeDto"
+        createdAtEpochMs:
+          type: integer
+          format: int64
+    PageResponseSessionResponse:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionResponse"
+    AvailableDayDto:
+      type: object
+      properties:
+        date:
+          type: string
+        remainingSeats:
+          type: integer
+          format: int32
+    AvailabilityResponse:
+      type: object
+      properties:
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleDto"
+        blockedDates:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockedDateDto"
+    AchievementDto:
+      type: object
+      properties:
+        criterion:
+          type: string
+        current:
+          type: number
+          format: double
+        nextThreshold:
+          type: number
+          format: double
+        nextBadgeId:
+          type: string
+    AdminUserRowDto:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        institution:
+          type: string
+        activeServices:
+          type: integer
+          format: int64
+        completedSessions:
+          type: integer
+          format: int64
+        createdAtEpochMs:
+          type: integer
+          format: int64
+    PageResponseAdminUserRowDto:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUserRowDto"
+    ActivityDto:
+      type: object
+      properties:
+        date:
+          type: string
+        sessions:
+          type: integer
+          format: int64
+        newUsers:
+          type: integer
+          format: int64
+    AdminStatsResponse:
+      type: object
+      properties:
+        users:
+          $ref: "#/components/schemas/UsersStats"
+        sessions:
+          $ref: "#/components/schemas/SessionsStats"
+        activityLast30Days:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityDto"
+    SessionsStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        byStatus:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+    UsersStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        active:
+          type: integer
+          format: int64
+        suspended:
+          type: integer
+          format: int64
+        mentors:
+          type: integer
+          format: int64
+    PageResponseBadgeDto:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BadgeDto"
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

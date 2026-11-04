@@ -85,14 +85,7 @@ public class Session {
      */
     public static Session request(String id, ServiceSnapshot service, String learnerId, LocalDate date,
                                   Modality modality, String learnerNote, long now) {
-        if (service.mentorId().equals(learnerId)) {
-            throw new ValidationException(
-                    List.of(new FieldIssue("serviceId", "No puedes solicitar tu propio servicio.")),
-                    "No puedes solicitar tu propio servicio.");
-        }
-        if (!service.modality().allows(modality)) {
-            throw ValidationException.of("modality", "Este servicio no ofrece esa modalidad.");
-        }
+        checkCanRequest(service, learnerId, modality);
         String note = learnerNote == null || learnerNote.isBlank() ? null : learnerNote.trim();
         if (note != null && note.length() > MAX_NOTE) {
             throw ValidationException.of("learnerNote", "La nota admite hasta 500 caracteres.");
@@ -102,6 +95,18 @@ public class Session {
                 List.of(new HistoryEntry(SessionStatus.PENDIENTE, now, learnerId, null)), now, 0);
         s.record(NotificationType.SESSION_REQUESTED, learnerId, List.of(service.mentorId()), null, Variant.NEW);
         return s;
+    }
+
+    /** Reglas que se revisan antes que la disponibilidad del día (mismo orden que la Fase I). */
+    public static void checkCanRequest(ServiceSnapshot service, String learnerId, Modality modality) {
+        if (service.mentorId().equals(learnerId)) {
+            throw new ValidationException(
+                    List.of(new FieldIssue("serviceId", "No puedes solicitar tu propio servicio.")),
+                    "No puedes solicitar tu propio servicio.");
+        }
+        if (!service.modality().allows(modality)) {
+            throw ValidationException.of("modality", "Este servicio no ofrece esa modalidad.");
+        }
     }
 
     /** Sumarse a la sesión grupal que ya existe ese día. Los cupos los verifica el caso de uso. */
