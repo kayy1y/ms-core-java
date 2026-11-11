@@ -1,6 +1,7 @@
 name: ci-cd
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
   push:
@@ -24,18 +25,28 @@ jobs:
         run: ./mvnw -B verify
 
       - name: Guardar el jar
-        if: github.event_name == 'push'
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: app
           path: target/app.jar
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Validar credenciales de despliegue
+        env:
+          WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        run: |
+          if [ -z "$WEBAPP_NAME" ] || [ -z "$PUBLISH_PROFILE" ]; then
+            echo "::error::Configura AZURE_WEBAPP_NAME (variable) y AZURE_WEBAPP_PUBLISH_PROFILE (secret)."
+            exit 1
+          fi
+
       - uses: actions/download-artifact@v4
         with:
           name: app
@@ -47,15 +58,56 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: app.jar
 
-      # El smoke test va contra APIM: la llamada directa al App Service debe dar 403.
-      - name: Smoke test vía APIM
+      # APIM es el modo final. El modo direct permite probar el despliegue inicial con F1.
+      # Elegir direct aquí no modifica la configuración de seguridad del backend.
+      - name: Comprobar salud de MS1
+        timeout-minutes: 8
+        env:
+          SMOKE_TEST_MODE: ${{ vars.SMOKE_TEST_MODE || 'apim' }}
+          WEBAPP_BASE_URL: ${{ vars.WEBAPP_BASE_URL }}
+          APIM_BASE_URL: ${{ secrets.APIM_BASE_URL }}
+          APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
         run: |
-          for i in 1 2 3 4 5 6; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" \
-              -H "Ocp-Apim-Subscription-Key: ${{ secrets.APIM_SUBSCRIPTION_KEY }}" \
-              "${{ secrets.APIM_BASE_URL }}/core/v1/health")
-            echo "intento $i → $code"
-            [ "$code" = "200" ] && exit 0
-            sleep 20
+          headers=()
+          case "$SMOKE_TEST_MODE" in
+            direct)
+              if [ -z "$WEBAPP_BASE_URL" ]; then
+                echo "::error::El modo direct necesita la variable WEBAPP_BASE_URL."
+                exit 1
+              fi
+              health_url="${WEBAPP_BASE_URL%/}/health"
+              echo "::notice::Prueba directa de MS1; la integración con APIM y certificados sigue pendiente."
+              ;;
+            apim)
+              if [ -z "$APIM_BASE_URL" ] || [ -z "$APIM_SUBSCRIPTION_KEY" ]; then
+                echo "::error::El modo apim necesita los secrets APIM_BASE_URL y APIM_SUBSCRIPTION_KEY."
+                exit 1
+              fi
+              health_url="${APIM_BASE_URL%/}/core/v1/health"
+              headers=(-H "Ocp-Apim-Subscription-Key: $APIM_SUBSCRIPTION_KEY")
+              ;;
+            *)
+              echo "::error::SMOKE_TEST_MODE debe ser direct o apim."
+              exit 1
+              ;;
+          esac
+          if [[ "$health_url" != https://* ]]; then
+            echo "::error::La dirección de comprobación debe usar HTTPS."
+            exit 1
+          fi
+          response_file=$(mktemp)
+          trap 'rm -f "$response_file"' EXIT
+          for i in {1..12}; do
+            code=$(curl -sS --connect-timeout 10 --max-time 20 \
+              -o "$response_file" -w "%{http_code}" "${headers[@]}" "$health_url") || code=000
+            echo "intento $i → HTTP $code"
+            if [ "$code" = "200" ] && python3 -c \
+              'import json, sys; data = json.load(open(sys.argv[1])); sys.exit(not (data.get("status") == "UP" and data.get("service") == "ms-core-java"))' \
+              "$response_file" 2>/dev/null; then
+              echo "MS1 responde correctamente."
+              exit 0
+            fi
+            if [ "$i" -lt 12 ]; then sleep 10; fi
           done
+          echo "::error::MS1 no devolvió status=UP y service=ms-core-java dentro del tiempo de espera."
           exit 1

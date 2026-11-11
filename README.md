@@ -143,7 +143,34 @@ Ver [`.env.example`](.env.example). En Azure van en **App Service → Configurat
 4. **GitHub → Settings:**
    - secrets: `AZURE_WEBAPP_PUBLISH_PROFILE`, `APIM_BASE_URL`, `APIM_SUBSCRIPTION_KEY`;
    - variable: `AZURE_WEBAPP_NAME`.
-5. Con push a `main`, el workflow corre `./mvnw verify`, despliega y hace el smoke test a `/core/v1/health` **a través de APIM**.
+5. Con push a `main`, el workflow corre `./mvnw verify`, despliega y comprueba la salud de MS1. Por defecto usa `/core/v1/health` **a través de APIM**. También se puede iniciar desde **Actions → ci-cd → Run workflow**, seleccionando `main`.
+
+### Despliegue inicial de pruebas con F1, mientras APIM está pendiente
+
+Esta etapa permite probar la API y Azure SQL. Los certificados de cliente requieren Basic o superior;
+la integración final con APIM y certificados queda pendiente y no se considera validada por esta prueba.
+
+1. En la Web App configura `SQL_URL`, `SQL_USER`, `SQL_PASSWORD` y una clave `JWT_SECRET` nueva.
+   Para esta etapa: `APIM_CERT_CHECK=false`, `EVENTS_ENABLED=false`, `SERVICE_CATALOG_MODE=stub`
+   y `GOOGLE_DEMO_ENABLED=false`. No actives el perfil `local` en Azure.
+2. Permite las conexiones de salida de la Web App en el firewall de Azure SQL.
+3. En **GitHub → Settings → Secrets and variables → Actions**, configura:
+
+   | Tipo | Nombre | Valor |
+   |---|---|---|
+   | Variable | `AZURE_WEBAPP_NAME` | Nombre exacto del recurso Web App |
+   | Variable | `WEBAPP_BASE_URL` | `https://` seguido del **Default domain** que muestra Azure, sin rutas |
+   | Variable | `SMOKE_TEST_MODE` | `direct` |
+   | Secret | `AZURE_WEBAPP_PUBLISH_PROFILE` | Contenido completo del perfil de publicación de esta Web App |
+
+   Descarga el perfil desde la Web App. Este método requiere **SCM Basic Auth Publishing Credentials**
+   habilitado. El perfil se guarda únicamente como secret; nunca se agrega al repositorio.
+4. Publica el workflow actualizado y ejecuta el despliegue sobre `main`. La comprobación exige HTTP 200
+   y un JSON con `status=UP` y `service=ms-core-java`; la página inicial de Azure no cuenta como éxito.
+
+Cuando P4 complete la configuración de APIM y certificados, configura los secrets `APIM_BASE_URL`
+y `APIM_SUBSCRIPTION_KEY`, cambia `SMOKE_TEST_MODE` a `apim` y activa la validación del certificado
+en MS1 con la huella acordada. El modo de comprobación no cambia automáticamente la seguridad del backend.
 
 ---
 
