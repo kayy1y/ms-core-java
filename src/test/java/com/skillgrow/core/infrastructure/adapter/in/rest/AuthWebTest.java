@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,6 +22,7 @@ import com.skillgrow.core.domain.port.in.ProfileUseCase;
 import com.skillgrow.core.infrastructure.adapter.out.security.JwtTokenService;
 import com.skillgrow.core.infrastructure.config.AppProperties;
 import com.skillgrow.core.infrastructure.config.ClockConfig;
+import com.skillgrow.core.infrastructure.config.CorsConfig;
 import com.skillgrow.core.infrastructure.security.ErrorWriter;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -36,10 +38,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /** Capa web: filtros reales (JWT y correlation id), controllers y formato de error; casos de uso simulados. */
 @WebMvcTest(controllers = {AuthController.class, MeController.class, HealthController.class})
-@Import({JwtTokenService.class, ErrorWriter.class, ClockConfig.class, AuthWebTest.Props.class})
+@Import({JwtTokenService.class, ErrorWriter.class, ClockConfig.class, CorsConfig.class, AuthWebTest.Props.class})
 @TestPropertySource(properties = {
         "app.zone=America/Costa_Rica", "app.jwt.secret=" + TestData.JWT_SECRET, "app.jwt.ttl-hours=8",
-        "app.jwt.issuer=skillgrow-core", "app.apim.cert-check=false", "app.catalog.mode=stub"})
+        "app.jwt.issuer=skillgrow-core", "app.apim.cert-check=false", "app.catalog.mode=stub",
+        "app.cors.allowed-origins=http://localhost:5173"})
 class AuthWebTest {
 
     @TestConfiguration
@@ -60,6 +63,36 @@ class AuthWebTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.timestampEpochMs").isNumber());
+    }
+
+    @Test
+    void preflightDelLoginYDelPerfilNoExigeToken() throws Exception {
+        mvc.perform(options("/v1/auth/login").header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
+        mvc.perform(options("/v1/me").header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "GET")
+                        .header("Access-Control-Request-Headers", "authorization"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Headers", "authorization"));
+    }
+
+    @Test
+    void origenNoPermitidoEsRechazado() throws Exception {
+        mvc.perform(options("/v1/auth/login").header("Origin", "https://otro-sitio.test")
+                        .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    }
+
+    @Test
+    void error401EsLegibleDesdeLaWebPermitida() throws Exception {
+        mvc.perform(get("/v1/me").header("Origin", "http://localhost:5173"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test

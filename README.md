@@ -144,6 +144,7 @@ Ver [`.env.example`](.env.example). En Azure van en **App Service → Configurat
 | `APIM_CERT_CHECK=true`, `APIM_CERT_THUMBPRINT` | Aceptar solo el certificado de cliente de APIM |
 | `SERVICE_CATALOG_MODE=http`, `DOMINIO_BASE_URL=https://<apim>.azure-api.net/dominio`, `APIM_SUBSCRIPTION_KEY` | Leer servicios y habilidades de MS2 a través de APIM |
 | `APP_ZONE=America/Costa_Rica` | Zona para calcular "hoy" (reservas desde mañana) |
+| `CORS_ALLOWED_ORIGINS` | Orígenes web exactos separados por comas. Vacío no permite acceso cruzado desde navegadores. En pruebas: `http://localhost:5174,http://127.0.0.1:5174` |
 
 ## Despliegue en Azure App Service
 
