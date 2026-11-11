@@ -210,6 +210,8 @@ en MS1 con la huella acordada. El modo de comprobación no cambia automáticamen
 - `/services/{id}/available-days` es de **MS1**: el mapa de prefijos debe mandarla a `/core`.
 - MS1 espera que `GET /dominio/v1/services/{id}` traiga `mentor.id` (o `mentorId`), `title`, `durationMinutes`, `type`, `capacity`, `modality` y `status`. También que `GET /dominio/v1/catalog/skills` traiga `[{ id, name }]`.
 - `ratingAverage` y `ratingCount` salen en 0 en MS1, porque las reseñas son de MS2.
+- MS1 valida habilidades e intereses contra el catálogo del contrato (`sk_python`…). El catálogo de la API de la Fase I usa ids numéricos (`2`) y MS1 los rechaza con 400. MS2 debe publicar los ids del contrato.
+- La web ya consume MS1 directamente (ver `docs/INTEGRACION_MS1.md` en el repo de la web). Cuando APIM esté listo, solo cambia `VITE_CORE_API_BASE_URL` a `https://<apim>/core/v1`.
 
 **Todos**
 - El formato de error usa `details[].message` (lo que ya lee la web), no `details[].issue` como dice el doc 03.

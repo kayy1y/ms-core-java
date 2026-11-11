@@ -8,10 +8,25 @@ MS1 está desplegado en la Web App principal `app-skillgrow-core-kay`, conectado
 directamente en F1. La ejecución de Actions y las 83 solicitudes / 148 aserciones de Postman pasaron.
 Los detalles y límites de esta comprobación están en [VERIFICACION-MS1.md](VERIFICACION-MS1.md).
 
-El catálogo sigue en `stub`, los eventos reales están desactivados y la integración con APIM y
-certificados sigue pendiente de P4. P1 debe participar en las pruebas cuando P2/P3/P4 proporcionen
-los servicios y la infraestructura. El login real de Google y la reputación dependiente de MS2
-también requieren su integración.
+**La web de SkillGrow ya usa MS1 real** (repo `Bradyy1202/SkillGrow`, commits `47d464f` y `fe17853`):
+login, registro, Google, perfil, disponibilidad, días reservables, sesiones, solicitudes, insignias,
+logros y administración de usuarios, sesiones e insignias. Detalle y pruebas en
+`docs/INTEGRACION_MS1.md` de ese repo. Se activa con la variable `VITE_CORE_API_BASE_URL`.
+
+| Tarea de la Persona 1 | Estado |
+|---|---|
+| Login real con JWT de MS1 y `/v1/me` | ✅ Probado en navegador contra Azure |
+| Registro y edición de perfil persistidos en Azure SQL | ✅ Probado contra Azure (201/200 y datos al releer) |
+| CORS para la web y adaptación de campos (`*EpochMs` → ISO) | ✅ `CORS_ALLOWED_ORIGINS` + `lib/coreMappers.ts` |
+| Disponibilidad, solicitudes, sesiones, insignias, admin | ✅ Conectados; ciclo reservar → aceptar → cancelar probado contra Azure |
+| Google | ⚠️ `GOOGLE_CLIENT_ID` cargado en App Service; falta probar con una cuenta real en el navegador |
+| Documentación de entrega | ✅ Este archivo, README y `INTEGRACION_MS1.md` de la web |
+
+**Pendiente que depende de otras personas:**
+- P2: MS2 con el catálogo del contrato (`srv_*`, `sk_*`) para reservar desde la pantalla de un servicio
+  y `SERVICE_CATALOG_MODE=http` en MS1. Hoy MS1 reserva sobre su catálogo `stub`.
+- P3: cola de Service Bus → `EVENTS_ENABLED=true` y `SERVICEBUS_CONNECTION` en MS1.
+- P4: APIM y certificados → `APIM_CERT_CHECK=true`, smoke test en modo `apim` y la web apuntando a `/core/v1`.
 
 ### Historial: verificación local al 4 de noviembre
 
