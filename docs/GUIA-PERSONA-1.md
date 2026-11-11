@@ -2,7 +2,18 @@
 
 Esta guía es para entender el servicio, terminar de desplegarlo y defenderlo. Primero va el estado, después los pasos en orden y al final las respuestas para la defensa.
 
-## 1. Estado al 4 de noviembre
+## 1. Estado actualizado al 11 de noviembre
+
+MS1 está desplegado en la Web App principal `app-skillgrow-core-kay`, conectado a Azure SQL y probado
+directamente en F1. La ejecución de Actions y las 83 solicitudes / 148 aserciones de Postman pasaron.
+Los detalles y límites de esta comprobación están en [VERIFICACION-MS1.md](VERIFICACION-MS1.md).
+
+El catálogo sigue en `stub`, los eventos reales están desactivados y la integración con APIM y
+certificados sigue pendiente de P4. P1 debe participar en las pruebas cuando P2/P3/P4 proporcionen
+los servicios y la infraestructura. El login real de Google y la reputación dependiente de MS2
+también requieren su integración.
+
+### Historial: verificación local al 4 de noviembre
 
 **Hecho y verificado en local:**
 - Arquitectura hexagonal completa: dominio puro, casos de uso, adaptadores y reglas con ArchUnit.
@@ -14,14 +25,16 @@ Esta guía es para entender el servicio, terminar de desplegarlo y defenderlo. P
 - Colección de Postman con 59 requests y 104 aserciones: **100% en verde con Newman**, dos corridas seguidas.
 - `docs/openapi.yaml` listo para importar en APIM. Workflow de CI/CD listo.
 
-**Falta (necesita Azure o al resto del equipo):**
-- Desplegar en App Service.
+**Integración final pendiente:**
 - Conectar el Service Bus real.
 - Activar el certificado de APIM.
 - Cambiar el catálogo a `http` cuando MS2 esté arriba.
 - Correr Postman contra APIM.
 
-## 2. Pasos en orden
+## 2. Plan original y criterios de integración
+
+El despliegue inicial y la comprobación directa ya se realizaron. La tabla conserva el plan original;
+las operaciones por APIM, certificados y mensajería se cierran cuando el equipo complete esas conexiones.
 
 | # | Cuándo | Paso | Listo cuando |
 |---|---|---|---|

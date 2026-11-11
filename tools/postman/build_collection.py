@@ -77,6 +77,9 @@ auth = folder(
     login("Login aprendiz (Valeria)", "aprendiz@skillgrow.test", "learnerToken"),
     login("Login mentora (Andrea)", "mentor@skillgrow.test", "mentorToken"),
     login("Login admin", "admin@skillgrow.test", "adminToken"),
+    req("Google rechaza un token inválido → 400", "POST", "/v1/auth/google", token=None,
+        body={"idToken": "invalid-token-for-qa"},
+        events=[tests(status(400), error_code("INVALID_CREDENTIALS"))]),
     req("Login con contraseña incorrecta → 400", "POST", "/v1/auth/login", token=None,
         body={"email": "aprendiz@skillgrow.test", "password": "otra"},
         events=[tests(status(400), error_code("INVALID_CREDENTIALS"), ERROR_SHAPE)]),
@@ -88,7 +91,9 @@ auth = folder(
     req("Registro nuevo → 201", "POST", "/v1/auth/register", token=None,
         body='{\n  "fullName": "Persona de Prueba",\n  "email": "{{newEmail}}",\n  "password": "Prueba123!"\n}',
         events=[pre('pm.collectionVariables.set("newEmail", `qa+${Date.now()}@skillgrow.test`);'),
-                tests(status(201), 'pm.test("rol user", () => pm.expect(pm.response.json().user.role).to.eql("user"));')]),
+                tests(status(201), 'pm.test("rol user", () => pm.expect(pm.response.json().user.role).to.eql("user"));',
+                      'pm.collectionVariables.set("qaToken", pm.response.json().token);',
+                      'pm.collectionVariables.set("qaUserId", pm.response.json().user.id);')]),
     req("Registro con correo existente → 400", "POST", "/v1/auth/register", token=None,
         body={"fullName": "Valeria Rojas", "email": "aprendiz@skillgrow.test", "password": "Skill123!"},
         events=[tests(status(400), error_code("EMAIL_ALREADY_EXISTS"))]),
@@ -97,6 +102,9 @@ auth = folder(
 
 security = folder(
     "01-Seguridad",
+    req("Health raíz identifica MS1", "GET", "/health", token=None, events=[tests(
+        status(200), 'pm.test("servicio correcto", () => { const b = pm.response.json(); '
+        'pm.expect(b.status).to.eql("UP"); pm.expect(b.service).to.eql("ms-core-java"); });')]),
     req("Health es público", "GET", "/v1/health", token=None,
         events=[tests(status(200), 'pm.test("UP", () => pm.expect(pm.response.json().status).to.eql("UP"));')]),
     req("Sin token → 401", "GET", "/v1/me", token=None, events=[tests(status(401), error_code("UNAUTHORIZED"))]),
@@ -138,6 +146,23 @@ profile = folder(
 
 availability = folder(
     "Disponibilidad",
+    req("Crear regla del usuario QA → 201", "POST", "/v1/me/availability/rules", token="qaToken",
+        body={"dayOfWeek": 0, "serviceIds": []}, events=[tests(status(201),
+            'pm.collectionVariables.set("qaRuleId", pm.response.json().id);',
+            'pm.test("domingo disponible", () => pm.expect(pm.response.json().dayOfWeek).to.eql(0));')]),
+    req("Editar regla rechaza un servicio ajeno → 400", "PUT", "/v1/me/availability/rules/{{qaRuleId}}",
+        token="qaToken", body={"serviceIds": ["srv_001"]},
+        events=[tests(status(400), error_code("VALIDATION_ERROR"))]),
+    req("Editar regla propia → 200", "PUT", "/v1/me/availability/rules/{{qaRuleId}}", token="qaToken",
+        body={"serviceIds": []}, events=[tests(status(200),
+            'pm.test("conserva identidad y día", () => { const b = pm.response.json(); '
+            'pm.expect(b.id).to.eql(pm.collectionVariables.get("qaRuleId")); '
+            'pm.expect(b.dayOfWeek).to.eql(0); pm.expect(b.serviceIds).to.eql([]); });')]),
+    req("Eliminar regla propia → 204", "DELETE", "/v1/me/availability/rules/{{qaRuleId}}", token="qaToken",
+        events=[tests(status(204))]),
+    req("La regla eliminada ya no aparece", "GET", "/v1/me/availability", token="qaToken", events=[tests(
+        status(200), 'pm.test("regla eliminada", () => pm.expect(pm.response.json().rules.map(r => r.id))'
+        '.not.to.include(pm.collectionVariables.get("qaRuleId")));')]),
     req("GET /me/availability (mentora)", "GET", "/v1/me/availability", token="mentorToken", events=[tests(
         status(200),
         'const b = pm.response.json();',
@@ -213,6 +238,34 @@ sessions = folder(
         events=[tests(status(400), error_code("INVALID_STATUS_TRANSITION"))]),
 )
 
+in_person = folder(
+    "Sesiones presenciales",
+    req("Día libre para sesión presencial", "GET", "/v1/services/{{inPersonServiceId}}/available-days",
+        events=[tests(status(200),
+            'const days = pm.response.json(); const free = days.find(d => d.remainingSeats === 4);',
+            'pm.test("día sin grupo previo", () => pm.expect(free).to.exist);',
+            'if (free) pm.collectionVariables.set("inPersonDate", free.date);')]),
+    req("Reservar presencial → 201", "POST", "/v1/sessions",
+        body={"serviceId": "{{inPersonServiceId}}", "date": "{{inPersonDate}}", "modality": "presencial"},
+        events=[tests(status(201), 'pm.collectionVariables.set("inPersonSessionId", pm.response.json().id);')]),
+    req("Aceptar presencial con ubicación", "PATCH", "/v1/sessions/{{inPersonSessionId}}/accept",
+        token="mentorToken", body={"location": {"name": "Biblioteca QA", "address": "Sala de estudio QA"}},
+        events=[tests(status(200), 'pm.test("confirmada presencial", () => { const b = pm.response.json(); '
+            'pm.expect(b.status).to.eql("confirmada"); pm.expect(b.modality).to.eql("presencial"); });')]),
+    req("El aprendiz no puede cambiar el lugar → 403", "PUT", "/v1/sessions/{{inPersonSessionId}}/location",
+        body={"name": "Otro lugar", "address": "Otra sala"}, events=[tests(status(403))]),
+    req("El mentor cambia el lugar", "PUT", "/v1/sessions/{{inPersonSessionId}}/location", token="mentorToken",
+        body={"name": "Biblioteca QA actualizada", "address": "Sala QA 2", "notes": "Prueba de ubicación"},
+        events=[tests(status(200), 'pm.test("ubicación actualizada", () => '
+            'pm.expect(pm.response.json().location.address).to.eql("Sala QA 2"));')]),
+    req("El aprendiz consulta la ubicación persistida", "GET", "/v1/sessions/{{inPersonSessionId}}", events=[tests(
+        status(200), 'pm.test("ubicación guardada", () => '
+        'pm.expect(pm.response.json().location.name).to.eql("Biblioteca QA actualizada"));')]),
+    req("Cancelar sesión presencial de QA", "PATCH", "/v1/sessions/{{inPersonSessionId}}/cancel",
+        body={"comment": "Fin de prueba presencial"}, events=[tests(status(200),
+            'pm.test("cancelada", () => pm.expect(pm.response.json().status).to.eql("cancelada"));')]),
+)
+
 admin = folder(
     "Administración",
     req("Usuarios", "GET", "/v1/admin/users", token="adminToken", query=[("search", "valeria")],
@@ -221,6 +274,18 @@ admin = folder(
         body={"status": "suspended", "reason": "x"}, events=[tests(status(400))]),
     req("Suspender a un admin → 403", "PATCH", "/v1/admin/users/usr_003/status", token="adminToken",
         body={"status": "suspended", "reason": "Prueba de permisos"}, events=[tests(status(403))]),
+    req("Suspender solo al usuario QA", "PATCH", "/v1/admin/users/{{qaUserId}}/status", token="adminToken",
+        body={"status": "suspended", "reason": "Prueba de suspensión de cuenta QA"}, events=[tests(status(200),
+            'pm.test("suspendido", () => pm.expect(pm.response.json().status).to.eql("suspended"));')]),
+    req("Cuenta suspendida no inicia sesión → 403", "POST", "/v1/auth/login", token=None,
+        body={"email": "{{newEmail}}", "password": "Prueba123!"}, events=[tests(status(403), error_code("FORBIDDEN"))]),
+    req("Reactivar usuario QA", "PATCH", "/v1/admin/users/{{qaUserId}}/status", token="adminToken",
+        body={"status": "active", "reason": "Finalizó la prueba de suspensión QA"}, events=[tests(status(200),
+            'pm.test("activo", () => pm.expect(pm.response.json().status).to.eql("active"));')]),
+    req("Cuenta reactivada vuelve a iniciar sesión", "POST", "/v1/auth/login", token=None,
+        body={"email": "{{newEmail}}", "password": "Prueba123!"}, events=[tests(status(200),
+            'pm.test("misma cuenta", () => pm.expect(pm.response.json().user.id)'
+            '.to.eql(pm.collectionVariables.get("qaUserId")));')]),
     req("Sesiones", "GET", "/v1/admin/sessions", token="adminToken", query=[("status", "completada")],
         events=[tests(status(200), PAGE_SHAPE)]),
     req("Estadísticas", "GET", "/v1/admin/stats", token="adminToken", events=[tests(
@@ -236,6 +301,27 @@ gamification = folder(
     req("Admin: todas las insignias", "GET", "/v1/admin/badges", token="adminToken", events=[tests(status(200), PAGE_SHAPE)]),
     req("Admin: insignia inválida → 400", "POST", "/v1/admin/badges", token="adminToken",
         body={"name": "X", "description": "corta", "criterion": "nada", "threshold": 0}, events=[tests(status(400))]),
+    req("Admin: crear insignia de QA inactiva", "POST", "/v1/admin/badges", token="adminToken",
+        body={"name": "Insignia QA {{qaBadgeSuffix}}", "description": "Insignia temporal para pruebas de API.",
+              "icon": "Award", "criterion": "completed_sessions", "threshold": 1000, "active": False},
+        events=[pre('pm.collectionVariables.set("qaBadgeSuffix", String(Date.now()));'), tests(status(201),
+            'pm.collectionVariables.set("qaBadgeId", pm.response.json().id);')]),
+    req("Admin: editar insignia de QA", "PUT", "/v1/admin/badges/{{qaBadgeId}}", token="adminToken",
+        body={"name": "Insignia QA {{qaBadgeSuffix}}", "description": "Descripción actualizada por la prueba de API.",
+              "icon": "Award", "criterion": "completed_sessions", "threshold": 999, "active": False},
+        events=[tests(status(200), 'pm.test("umbral actualizado", () => pm.expect(pm.response.json().threshold).to.eql(999));')]),
+    req("Admin: activar insignia de QA", "PATCH", "/v1/admin/badges/{{qaBadgeId}}/status", token="adminToken",
+        body={"active": True}, events=[tests(status(200),
+            'pm.test("activa", () => pm.expect(pm.response.json().active).to.eql(true));')]),
+    req("La insignia activa aparece en el catálogo", "GET", "/v1/badges", events=[tests(status(200),
+        'pm.test("visible", () => pm.expect(pm.response.json().map(b => b.id))'
+        '.to.include(pm.collectionVariables.get("qaBadgeId")));')]),
+    req("Admin: desactivar insignia de QA al terminar", "PATCH", "/v1/admin/badges/{{qaBadgeId}}/status",
+        token="adminToken", body={"active": False}, events=[tests(status(200),
+            'pm.test("inactiva", () => pm.expect(pm.response.json().active).to.eql(false));')]),
+    req("La insignia inactiva desaparece del catálogo", "GET", "/v1/badges", events=[tests(status(200),
+        'pm.test("oculta", () => pm.expect(pm.response.json().map(b => b.id))'
+        '.not.to.include(pm.collectionVariables.get("qaBadgeId")));')]),
 )
 
 collection = {
@@ -245,13 +331,14 @@ collection = {
         "description": "Pruebas de MS1 (Java). baseUrl local: http://localhost:8090 · Azure: https://<apim>.azure-api.net/core",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     },
-    "item": [auth, security, folder("02-MS1-Core", profile, availability, sessions, admin, gamification)],
-    "variable": [{"key": "serviceId", "value": "srv_001"}],
+    "item": [auth, security, folder("02-MS1-Core", profile, availability, sessions, in_person, admin, gamification)],
+    "variable": [{"key": "serviceId", "value": "srv_001"}, {"key": "inPersonServiceId", "value": "srv_008"}],
 }
 
 OUT.mkdir(exist_ok=True)
 (OUT / "MS1-Core.postman_collection.json").write_text(json.dumps(collection, ensure_ascii=False, indent=2) + "\n")
-for env_name, base in [("local", "http://localhost:8090"), ("azure", "https://<apim>.azure-api.net/core")]:
+for env_name, base in [("local", "http://localhost:8090"), ("azure", "https://<apim>.azure-api.net/core"),
+                       ("azure-direct", "https://<dominio-predeterminado-de-la-web-app>")]:
     env = {"name": f"MS1-Core-{env_name}", "values": [
         {"key": "baseUrl", "value": base, "enabled": True},
         # La key real va solo en "Current value" (no se exporta).
@@ -259,5 +346,5 @@ for env_name, base in [("local", "http://localhost:8090"), ("azure", "https://<a
     ], "_postman_variable_scope": "environment"}
     (OUT / f"MS1-Core-{env_name}.postman_environment.json").write_text(json.dumps(env, indent=2) + "\n")
 
-count = sum(len(f["item"]) for f in [auth, security, profile, availability, sessions, admin, gamification])
+count = sum(len(f["item"]) for f in [auth, security, profile, availability, sessions, in_person, admin, gamification])
 print(f"{count} requests")

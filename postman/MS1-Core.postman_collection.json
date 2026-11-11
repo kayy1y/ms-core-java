@@ -145,6 +145,49 @@
           }
         },
         {
+          "name": "Google rechaza un token inválido → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"code INVALID_CREDENTIALS\", () => pm.expect(pm.response.json().code).to.eql(\"INVALID_CREDENTIALS\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/google",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "auth",
+                "google"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"invalid-token-for-qa\"\n}"
+            }
+          }
+        },
+        {
           "name": "Login con contraseña incorrecta → 400",
           "event": [
             {
@@ -250,7 +293,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"rol user\", () => pm.expect(pm.response.json().user.role).to.eql(\"user\"));"
+                  "pm.test(\"rol user\", () => pm.expect(pm.response.json().user.role).to.eql(\"user\"));",
+                  "pm.collectionVariables.set(\"qaToken\", pm.response.json().token);",
+                  "pm.collectionVariables.set(\"qaUserId\", pm.response.json().user.id);"
                 ]
               }
             }
@@ -370,6 +415,39 @@
     {
       "name": "01-Seguridad",
       "item": [
+        {
+          "name": "Health raíz identifica MS1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"servicio correcto\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(\"UP\"); pm.expect(b.service).to.eql(\"ms-core-java\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Ocp-Apim-Subscription-Key",
+                "value": "{{subscriptionKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
         {
           "name": "Health es público",
           "event": [
@@ -989,6 +1067,232 @@
         {
           "name": "Disponibilidad",
           "item": [
+            {
+              "name": "Crear regla del usuario QA → 201",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set(\"qaRuleId\", pm.response.json().id);",
+                      "pm.test(\"domingo disponible\", () => pm.expect(pm.response.json().dayOfWeek).to.eql(0));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{qaToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dayOfWeek\": 0,\n  \"serviceIds\": []\n}"
+                }
+              }
+            },
+            {
+              "name": "Editar regla rechaza un servicio ajeno → 400",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+                      "pm.test(\"code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.eql(\"VALIDATION_ERROR\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{qaToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules/{{qaRuleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules",
+                    "{{qaRuleId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceIds\": [\n    \"srv_001\"\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Editar regla propia → 200",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"conserva identidad y día\", () => { const b = pm.response.json(); pm.expect(b.id).to.eql(pm.collectionVariables.get(\"qaRuleId\")); pm.expect(b.dayOfWeek).to.eql(0); pm.expect(b.serviceIds).to.eql([]); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{qaToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules/{{qaRuleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules",
+                    "{{qaRuleId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceIds\": []\n}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar regla propia → 204",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{qaToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability/rules/{{qaRuleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability",
+                    "rules",
+                    "{{qaRuleId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "La regla eliminada ya no aparece",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"regla eliminada\", () => pm.expect(pm.response.json().rules.map(r => r.id)).not.to.include(pm.collectionVariables.get(\"qaRuleId\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{qaToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/me/availability",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "me",
+                    "availability"
+                  ]
+                }
+              }
+            },
             {
               "name": "GET /me/availability (mentora)",
               "event": [
@@ -2212,6 +2516,329 @@
           ]
         },
         {
+          "name": "Sesiones presenciales",
+          "item": [
+            {
+              "name": "Día libre para sesión presencial",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "const days = pm.response.json(); const free = days.find(d => d.remainingSeats === 4);",
+                      "pm.test(\"día sin grupo previo\", () => pm.expect(free).to.exist);",
+                      "if (free) pm.collectionVariables.set(\"inPersonDate\", free.date);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/services/{{inPersonServiceId}}/available-days",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "services",
+                    "{{inPersonServiceId}}",
+                    "available-days"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reservar presencial → 201",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set(\"inPersonSessionId\", pm.response.json().id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serviceId\": \"{{inPersonServiceId}}\",\n  \"date\": \"{{inPersonDate}}\",\n  \"modality\": \"presencial\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Aceptar presencial con ubicación",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"confirmada presencial\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(\"confirmada\"); pm.expect(b.modality).to.eql(\"presencial\"); });"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{inPersonSessionId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{inPersonSessionId}}",
+                    "accept"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"location\": {\n    \"name\": \"Biblioteca QA\",\n    \"address\": \"Sala de estudio QA\"\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "El aprendiz no puede cambiar el lugar → 403",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{inPersonSessionId}}/location",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{inPersonSessionId}}",
+                    "location"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Otro lugar\",\n  \"address\": \"Otra sala\"\n}"
+                }
+              }
+            },
+            {
+              "name": "El mentor cambia el lugar",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"ubicación actualizada\", () => pm.expect(pm.response.json().location.address).to.eql(\"Sala QA 2\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{mentorToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{inPersonSessionId}}/location",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{inPersonSessionId}}",
+                    "location"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Biblioteca QA actualizada\",\n  \"address\": \"Sala QA 2\",\n  \"notes\": \"Prueba de ubicación\"\n}"
+                }
+              }
+            },
+            {
+              "name": "El aprendiz consulta la ubicación persistida",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"ubicación guardada\", () => pm.expect(pm.response.json().location.name).to.eql(\"Biblioteca QA actualizada\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{inPersonSessionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{inPersonSessionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancelar sesión presencial de QA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"cancelada\", () => pm.expect(pm.response.json().status).to.eql(\"cancelada\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/sessions/{{inPersonSessionId}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "sessions",
+                    "{{inPersonSessionId}}",
+                    "cancel"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"comment\": \"Fin de prueba presencial\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
           "name": "Administración",
           "item": [
             {
@@ -2352,6 +2979,190 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Prueba de permisos\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Suspender solo al usuario QA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"suspendido\", () => pm.expect(pm.response.json().status).to.eql(\"suspended\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/users/{{qaUserId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "users",
+                    "{{qaUserId}}",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Prueba de suspensión de cuenta QA\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Cuenta suspendida no inicia sesión → 403",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 403\", () => pm.response.to.have.status(403));",
+                      "pm.test(\"code FORBIDDEN\", () => pm.expect(pm.response.json().code).to.eql(\"FORBIDDEN\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"Prueba123!\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Reactivar usuario QA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"activo\", () => pm.expect(pm.response.json().status).to.eql(\"active\"));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/users/{{qaUserId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "users",
+                    "{{qaUserId}}",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"active\",\n  \"reason\": \"Finalizó la prueba de suspensión QA\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Cuenta reactivada vuelve a iniciar sesión",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"misma cuenta\", () => pm.expect(pm.response.json().user.id).to.eql(pm.collectionVariables.get(\"qaUserId\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"Prueba123!\"\n}"
                 }
               }
             },
@@ -2643,6 +3454,284 @@
                   "raw": "{\n  \"name\": \"X\",\n  \"description\": \"corta\",\n  \"criterion\": \"nada\",\n  \"threshold\": 0\n}"
                 }
               }
+            },
+            {
+              "name": "Admin: crear insignia de QA inactiva",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set(\"qaBadgeSuffix\", String(Date.now()));"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set(\"qaBadgeId\", pm.response.json().id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Insignia QA {{qaBadgeSuffix}}\",\n  \"description\": \"Insignia temporal para pruebas de API.\",\n  \"icon\": \"Award\",\n  \"criterion\": \"completed_sessions\",\n  \"threshold\": 1000,\n  \"active\": false\n}"
+                }
+              }
+            },
+            {
+              "name": "Admin: editar insignia de QA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"umbral actualizado\", () => pm.expect(pm.response.json().threshold).to.eql(999));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges/{{qaBadgeId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges",
+                    "{{qaBadgeId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Insignia QA {{qaBadgeSuffix}}\",\n  \"description\": \"Descripción actualizada por la prueba de API.\",\n  \"icon\": \"Award\",\n  \"criterion\": \"completed_sessions\",\n  \"threshold\": 999,\n  \"active\": false\n}"
+                }
+              }
+            },
+            {
+              "name": "Admin: activar insignia de QA",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"activa\", () => pm.expect(pm.response.json().active).to.eql(true));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges/{{qaBadgeId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges",
+                    "{{qaBadgeId}}",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": true\n}"
+                }
+              }
+            },
+            {
+              "name": "La insignia activa aparece en el catálogo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"visible\", () => pm.expect(pm.response.json().map(b => b.id)).to.include(pm.collectionVariables.get(\"qaBadgeId\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "badges"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Admin: desactivar insignia de QA al terminar",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"inactiva\", () => pm.expect(pm.response.json().active).to.eql(false));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/admin/badges/{{qaBadgeId}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "admin",
+                    "badges",
+                    "{{qaBadgeId}}",
+                    "status"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": false\n}"
+                }
+              }
+            },
+            {
+              "name": "La insignia inactiva desaparece del catálogo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"oculta\", () => pm.expect(pm.response.json().map(b => b.id)).not.to.include(pm.collectionVariables.get(\"qaBadgeId\")));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Ocp-Apim-Subscription-Key",
+                    "value": "{{subscriptionKey}}"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{learnerToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/badges",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "badges"
+                  ]
+                }
+              }
             }
           ]
         }
@@ -2653,6 +3742,10 @@
     {
       "key": "serviceId",
       "value": "srv_001"
+    },
+    {
+      "key": "inPersonServiceId",
+      "value": "srv_008"
     }
   ]
 }

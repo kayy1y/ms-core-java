@@ -108,13 +108,26 @@ Al arrancar, Flyway crea las tablas y carga el seed de la Fase I. Todos los usua
 | Web | `@WebMvcTest` con los filtros reales: 401, 403 en admin, formato de error, epoch, visibilidad del enlace |
 | Integración (`*IT`) | Testcontainers con SQL Server real: Flyway, índice único, concurrencia optimista y búsqueda sin tildes. Se saltan si no hay Docker |
 
-**Postman:** `postman/MS1-Core.postman_collection.json` tiene 59 requests y 104 aserciones. Se puede correr varias veces seguidas.
+**Postman:** `postman/MS1-Core.postman_collection.json` tiene 83 requests y 148 aserciones. Las 42 operaciones de OpenAPI tienen al menos una solicitud con aserciones. El flujo cancela las reservas de prueba, elimina su regla y bloqueo de disponibilidad y deja inactiva la insignia QA; cada corrida crea una cuenta QA y una insignia de prueba nuevas.
 
 ```bash
 npx newman run postman/MS1-Core.postman_collection.json -e postman/MS1-Core-local.postman_environment.json
 ```
 
 Si se cambia algo de la colección, se regenera con `python3 tools/postman/build_collection.py`.
+
+Para probar el despliegue inicial sin APIM con Postman CLI:
+
+```bash
+postman collection run postman/MS1-Core.postman_collection.json \
+  -e postman/MS1-Core-azure-direct.postman_environment.json \
+  --env-var 'baseUrl=https://<dominio-predeterminado-de-la-web-app>' \
+  --no-report-events --timeout-request 25000
+```
+
+La colección utiliza los datos iniciales de MS1 (`srv_001`, `srv_008` y las cuentas de prueba).
+La prueba de Google comprueba el rechazo de un token inválido; el acceso con un token real requiere
+configurar `GOOGLE_CLIENT_ID` y se valida durante la integración. Evidencias: [verificación del 11 de noviembre](docs/VERIFICACION-MS1.md).
 
 ---
 
@@ -154,6 +167,12 @@ la integración final con APIM y certificados queda pendiente y no se considera 
    Para esta etapa: `APIM_CERT_CHECK=false`, `EVENTS_ENABLED=false`, `SERVICE_CATALOG_MODE=stub`
    y `GOOGLE_DEMO_ENABLED=false`. No actives el perfil `local` en Azure.
 2. Permite las conexiones de salida de la Web App en el firewall de Azure SQL.
+   Azure puede elegir distintas IP de salida: revisa `outboundIpAddresses` y
+   `possibleOutboundIpAddresses` del recurso; permitir una sola IP puede producir fallos al reiniciar.
+   Para el entorno F1 se configuró heap Java de 512 MB (`WEBSITE_JAVA_MAX_HEAP_MB=512`),
+   `SQL_POOL_SIZE=2`, conexiones ociosas liberables (`SPRING_DATASOURCE_HIKARI_MINIMUMIDLE=0`,
+   `SPRING_DATASOURCE_HIKARI_IDLETIMEOUT=60000`) y reintentos de conexión de Flyway
+   (`SPRING_FLYWAY_CONNECTRETRIES=6`, `SPRING_FLYWAY_CONNECTRETRIESINTERVAL=5s`).
 3. En **GitHub → Settings → Secrets and variables → Actions**, configura:
 
    | Tipo | Nombre | Valor |
