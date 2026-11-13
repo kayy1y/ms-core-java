@@ -68,6 +68,11 @@ jobs:
           APIM_BASE_URL: ${{ secrets.APIM_BASE_URL }}
           APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
         run: |
+          # Un secret pegado con espacio o Enter al final rompe la URL (curl: Malformed input).
+          trim() { printf '%s' "$1" | tr -d '[:space:]'; }
+          WEBAPP_BASE_URL=$(trim "$WEBAPP_BASE_URL")
+          APIM_BASE_URL=$(trim "$APIM_BASE_URL")
+          APIM_SUBSCRIPTION_KEY=$(trim "$APIM_SUBSCRIPTION_KEY")
           headers=()
           case "$SMOKE_TEST_MODE" in
             direct)
